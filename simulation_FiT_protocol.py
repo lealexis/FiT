@@ -1,23 +1,24 @@
-
-from qunetsim.components import Network, Host
-from qunetsim.objects import Qubit, DaemonThread
-import numpy as np 
+import math
 import random
-from PIL import Image
 import time
+from threading import Event
 
+from matplotlib import pyplot as plt
+import numpy as np
+from PIL import Image
+from qunetsim.components import Host, Network
+from qunetsim.objects import DaemonThread, Qubit
+ 
 import QuTils
 from epr_gen_class import EPR_generator, EPR_Pair_fidelity
 from ent_buff_itfc_FT_NON_IDEAL_FEU import EPR_buff_itfc
 from rotational_error_class import Rot_Error
 from pipelined_CQ_channel import QuPipe, ClassicPipe
 
-from threading import Event 
-from matplotlib import pyplot as plt
-import math
 
 """An image of 560 bits is sent from Alice to Bob over a quantum channel using superdense coding after distributing 
- EPR-pairs between Alice and Bob. For this purpose a protocol is implemented where EPR-frames and SDC-frames are allowed
+ EPR-pairs(a.k.a. entanglement) between Alice and Bob. For this purpose a protocol is implemented where EPR-frames 
+ and SDC-frames are allowed
  between Alice and Bob; in the case of EPR-frame transmission, also the fidelity of the EPR-frame is estimated and 
  depending on a fidelity threshold the distributed EPR-pairs are stored or dropped. The stored EPR-pairs halves are then 
  retrieved from Alice's quantum memory using the entanglement manager. Chunks of the image as bits are encoded in the 
@@ -28,32 +29,33 @@ import math
  them between EPR-frame and SDC-frame. Classical feedback channel is ideal and no decoherence nor photon absorption is 
  considered in this model"""
 
-PRED_LEN = True # whether to use predictive Q-frame length estimator specific for the channel quality of this simulation
+PRED_LEN = True  # whether to use predictive Q-frame length estimator specific for the channel quality of this simulation
 
 if PRED_LEN:
-    from pred_Q import pred_frame_len as frm_len_EST # measuring portion Q for the oscillating channel's quality
+    from pred_Q import pred_frame_len as frm_len_EST  # measuring portion Q for the oscillating channel's quality
 else:
-    from meas_portion import frame_length_estimator as frm_len_EST # measuring portion without adaption to channel's
-    # quality
+    from meas_portion import frame_length_estimator as frm_len_EST 
+    # measuring portion without adaption to channel's quality
 
-INTER_CBIT_TIME = 0.03 # time between the bits of the feedback signals. 30 ms
-INTER_QBIT_TIME = 0.018 # time between the qubits of the quantum frames. 18ms
-EFF_LOAD = 40 # amount of EPR-pairs distributed in an EPR-frame. Use a length compatible with 560 bits, each EPR-pair
+INTER_CBIT_TIME = 0.03  # time between the bits of the feedback signals. 30 ms
+INTER_QBIT_TIME = 0.018  # time between the qubits of the quantum frames. 18ms
+EFF_LOAD = 40 
+# amount of EPR-pairs distributed in an EPR-frame. Use a length compatible with 560 bits, each EPR-pair
 # transmit 2 bits. Ex:(7*40)*2 = 560
-BASE_FIDELITY = 0.5 # Common knowledge about fidelity for Alice & Bob used to reduce the amount of bits in the protocol.
-SIG = 0.15 # standard deviation for rotational angle of header qubit; if 0 implies a perfect header.
-# thres for mario: 0.6 0.75 0.9
-F_THRES = 0.75 # EPR-frames with a fidelity below this threshold will be dropped and above it will be stored.
+BASE_FIDELITY = 0.5  # Common knowledge about fidelity for Alice & Bob used to reduce the amount of bits in the protocol.
+SIG = 0.15  # standard deviation for rotational angle of header qubit; if 0 implies a perfect header.
+# threshold for mario: 0.6 0.75 0.9
+F_THRES = 0.75  # EPR-frames with a fidelity below this threshold will be dropped and above it will be stored.
 
-global sent_mssgs # keeps track of the data sent from alice to bob
+global sent_mssgs  # keeps track of the data sent from alice to bob
 sent_mssgs = ""
-global dcdd_mssgs # keeps track of decoded data at bob
+global dcdd_mssgs  # keeps track of decoded data at bob
 dcdd_mssgs = ""
-global finish_time # simulation timespan in seconds
+global finish_time  # simulation timespan in seconds
 finish_time = None
-global PROCESS # list to store "EPR" or "SDC" used to determine which kind of quantum frame will be sent next
+global PROCESS  # list to store "EPR" or "SDC" used to determine which kind of quantum frame will be sent next
 PROCESS = []
-global SAVE_MARIO # to save final received image set to true
+global SAVE_MARIO  # to save final received image set to true
 SAVE_MARIO = False
 
 """Definition of classical data to be sent from Alice to Bob. An image 
@@ -65,11 +67,11 @@ im.close()
 coloumns, rows, colors = pixels.shape
 dtype = pixels.dtype
 
-hashes = [] # used for image's binary preparation
+hashes = []  # used for image's binary preparation
 hashes_ = []
 
-palette = {} # used at receiving mario image
-indices = {} # used to prepare image's binary
+palette = {}  # used at receiving mario image
+indices = {}  # used to prepare image's binary
 for row in range(rows):
     for column in range(coloumns):
         color = pixels[column, row, :]
@@ -80,7 +82,7 @@ for row in range(rows):
 
 hashes = list(set(hashes))
 
-for i, hashed in enumerate(hashes): # preparing for binary extraction
+for i, hashed in enumerate(hashes):  # preparing for binary extraction
     indices[hashed] = i
 
 def binaryTupleFromInteger(i):
@@ -91,10 +93,10 @@ def integerFromBinaryTuple(a, b):
     """Transforms binary into integer. Used to recreate received image from binary to int."""
     return a * 2 ** 1 + b * 2 ** 0
 
-global received_mario # to store the received image
-received_mario = np.zeros((coloumns, rows, colors), dtype=dtype) # empty array to store received data.
+global received_mario  # to store the received image
+received_mario = np.zeros((coloumns, rows, colors), dtype=dtype)  # empty array to store received data.
 
-global im_2_send # holds image to be sent from Alice to Bob as binary
+global im_2_send  # holds image to be sent from Alice to Bob as binary
 im_2_send = ""
 
 for row in range(rows):
@@ -102,8 +104,8 @@ for row in range(rows):
         color = pixels[column, row, :]
         hashed = hash(tuple(color))
         index = indices[hashed]
-        b1, b2 = binaryTupleFromInteger(index) # transform to binary
-        im_2_send += str(b1) + str(b2) # store as binary string
+        b1, b2 = binaryTupleFromInteger(index)  # transform to binary
+        im_2_send += str(b1) + str(b2)  # store as binary string
 
 def int2bin(i,length):
     """integer into binary. Used to transmit fidelity as binary in classical feedback."""
@@ -158,7 +160,7 @@ def sEPR_proto(host: Host, receiver_id , epr_gen: EPR_generator,
     THRES = None  # to store decided Threshold
     while True:
         try:
-            bit = clsicPipeChann.out_socket.pop() # persistent hearing of classical feedback channel
+            bit = clsicPipeChann.out_socket.pop()  # persistent hearing of classical feedback channel
         except IndexError:
             continue
         else:  # a bit was received from the classical feedback channel
@@ -238,7 +240,7 @@ def sEPR_proto(host: Host, receiver_id , epr_gen: EPR_generator,
         qbery = 0 
         qberz = 0
 
-        for idx in range(len(recv_meas)): # calculate different QBER looping over measurement outputs
+        for idx in range(len(recv_meas)):  # calculate different QBER looping over measurement outputs
             meas_count += 1
             if meas_count < (mxyz_len + 1):  # first 1/3 of measurements are X-Measurements outputs
                 if recv_meas[idx] == local_meas[idx]:  # both equal --> no error
@@ -250,7 +252,7 @@ def sEPR_proto(host: Host, receiver_id , epr_gen: EPR_generator,
                     qbery += 1
                 else:  # different --> no error
                     continue
-            else: # last third are Z-Measurements outputs
+            else:  # last third are Z-Measurements outputs
                 if recv_meas[idx] == local_meas[idx]:  # both equal --> no error
                     continue
                 else:  # different --> error
@@ -268,10 +270,10 @@ def sEPR_proto(host: Host, receiver_id , epr_gen: EPR_generator,
         F_EST = F_send / 1000  # to be set on local entanglement manager
         F_send = F_send - 500  # to be set to BOB
 
-        if F_thres > f_thres_recv: # use Alice's or Bob's Fidelity threshold
+        if F_thres > f_thres_recv:  # use Alice's or Bob's Fidelity threshold
             THRES =  F_thres
         else:
-            THRES = f_thres_recv # Bob's threshold
+            THRES = f_thres_recv  # Bob's threshold
 
         if THRES <= F_EST:  # ACK
             qmem_itfc.set_F_EPR_END_PHASE(F_est=F_EST)  # set estimated fidelity to remaining EPR-pairs
@@ -281,7 +283,7 @@ def sEPR_proto(host: Host, receiver_id , epr_gen: EPR_generator,
             # The epr-ack is composed as:  [1, F_est]
             epr_ack = [1]
             epr_ack.extend(int2bin(F_send, 9))
-            for bit in epr_ack: # send epr-ack over channel bit by bit
+            for bit in epr_ack:  # send epr-ack over channel bit by bit
                 clsicPipeChann.put(bit)
                 time.sleep(INTER_CBIT_TIME)
 
@@ -358,7 +360,7 @@ def sender_protocol(host: Host, receiver_id, epr_gen: EPR_generator,
             continue
         else:
             if process_type == "EPR":
-                if qmem_itfc.is_full: # go back to get next element from PROCESS
+                if qmem_itfc.is_full:  # go back to get next element from PROCESS
                     print("ALICE/EPR - Memory interface is full.\n")
                     continue
                 else:
@@ -478,10 +480,8 @@ def receiver_protocol(host:Host, qmem_itfc: EPR_buff_itfc, quPipeChann: QuPipe,
                             print("BOB  /SDC - recv SDC-Frame nuID:{id_u}".format(
                                                     id_u=frame_id))
                         continue
-                # EPR-Frame
-                else:
-                    # Header was corrupted, it must have been SDC-Frame
-                    if qmem_itfc.is_full:
+                else:  # EPR-Frame
+                    if qmem_itfc.is_full:  # Header was corrupted, it must have been SDC-Frame
                         Type=1
                         dcdd_mssg = ""  # To store SDC-decoded message
                         frame_id = qmem_itfc.nuID_SDC_START()  # id of stored EPR-frame used for SDC-decoding
@@ -489,8 +489,7 @@ def receiver_protocol(host:Host, qmem_itfc: EPR_buff_itfc, quPipeChann: QuPipe,
                             print("BOB  /SDC - recv SDC-Frame nuID:{id_u}".format(
                                                     id_u=frame_id))
                         continue
-                    # There is space in entanglement manager, interpret payload as EPR-Frame
-                    else:
+                    else:  # There is space in entanglement manager, interpret payload as EPR-Frame
                         Type = 0                        
                         frame_id = qmem_itfc.nfID_EPR_START()  # id of EPR-frame being received
                         if (verbose_level == 0) or (verbose_level == 1):    
@@ -513,19 +512,16 @@ def receiver_protocol(host:Host, qmem_itfc: EPR_buff_itfc, quPipeChann: QuPipe,
                     else:  # all EPR-halves were consumed, destroy qubits by measuring
                         qbit.measure()
 
-                # Quantum frame is still in transmission
-                if quPipeChann.Qframe_in_transmission.is_set():
+                if quPipeChann.Qframe_in_transmission.is_set():  # Quantum frame is still in transmission
                     continue
-                # Quantum frame was  completely received
-                else:
+                else:  # Quantum frame was  completely received
                     if Type == 1:
                         if count == (qmem_itfc.eff_load + 1):  # SDC-Frame
                             if (verbose_level == 0) or (verbose_level == 1):   
                                     print("BOB  /SDC - recv C-Info: {cmsg}".format(cmsg=dcdd_mssg))
                             qmem_itfc.finish_SDC(val_C_info=int(1))  # decoded information is valid
                             dcdd_mssgs += dcdd_mssg
-                            # IMAGE was completely sent ---> Process data & STOP SIMULATION
-                            if len(im_2_send) == 0:
+                            if len(im_2_send) == 0:  # IMAGE was completely sent, Process data & STOP SIMULATION
                                 finish_time = time.time()
                                 print("SIMULATION END: Image was completely sent!")
                                 received_indexes = []
@@ -640,7 +636,7 @@ def receiver_protocol(host:Host, qmem_itfc: EPR_buff_itfc, quPipeChann: QuPipe,
                             epr_feed = [1]
                             epr_feed.extend(F_thres)
 
-                            #TODO: perform measurements in a single loop to simplify code
+                            # TODO: perform measurements in a single loop to simplify code
 
                             # X-MEASUREMENT
                             x_qids = rRandom.sample(meas_qids, int(meas_amount/3))  # random qubits for X-Measurement
@@ -748,15 +744,13 @@ def main():
     network.start()
 
     if FINAL_EXP:  # oscillation parameters passed to EPR-Pair generator and RXY-noise
-        if EXP_1:
-            # use min_fid = 0.5
+        if EXP_1:  # use min_fid = 0.5
             freq_mu = 1/750
             freq = 1/750
             mu_phi = 0
             gamm_mu_phi = np.pi
             phi = np.pi
-        else:
-            # use min_fid = 0.8
+        else:  # use min_fid = 0.8
             freq_mu = 1/750
             freq = 1/1500
             mu_phi = np.pi
@@ -765,8 +759,7 @@ def main():
 
     if FOR_PORTION_PLOT:  # special simulation to generate dataset
         # EPR-Pair generator parameters
-        if LOW_VAR:
-            # amplitude standard deviation as max and min point
+        if LOW_VAR:  # amplitude standard deviation as max and min point
             gen_mx_dev = 0.05
             gen_mn_dev = 0.015
         else:
@@ -950,7 +943,6 @@ def main():
         print(qumem_itfc_B.SDC_frame_history)
         print(qumem_itfc_A.In_halves_history)
         print(qumem_itfc_B.In_halves_history)
-    
     print("\nFinishing simulation!")
     Alice.stop()
     Bob.stop()
