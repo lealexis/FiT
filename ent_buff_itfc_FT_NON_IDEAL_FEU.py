@@ -1,9 +1,11 @@
+import time
+
+import numpy as np
+import pandas as pd
+from QuTils import get_epr_fidelity
 from qunetsim.objects import Qubit
 from qunetsim.components import Host
-from QuTils import EPR_Pair_fidelity
-import numpy as np
-import pandas as pd 
-import time
+
 
 class HostNotStartedException(Exception):
     pass
@@ -348,7 +350,7 @@ class EPR_buff_itfc(object):
         if self.in_process and valid_mssg: 
             qids = self._get_qubit_ids_from_fr_ID(id_f=self._get_ID_in_process())
             ti = time.perf_counter() - self.start_time 
-            fest =  EPR_Pair_fidelity(epr_half)
+            fest =  get_epr_fidelity(epr_half)
             actualize_df = pd.DataFrame([[ti, fest]], columns=["t_in", "Fid_in"])
             self._actualize_histories(df_to_add=actualize_df, kind="in")
             q_id = self.host.add_epr(host_id=self.partner_host_id, qubit=epr_half)        

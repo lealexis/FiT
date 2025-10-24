@@ -1,40 +1,44 @@
-
-from qunetsim.objects import Qubit
-import pandas as pd
-import numpy as np 
 import time
+
+import numpy as np
+import pandas as pd
+from qunetsim.objects import Qubit
+
+GAMMA_LIMIT = 0 
 
 class RotErrorBadParameterException(Exception):
     pass
 
+
 class RotErrorBadTypException(Exception):
     pass
 
-class Rot_Error(object):
-    def __init__(self, max_rot=0.4, min_rot=0.05, max_dev=0.1, 
-                 min_dev=0.01, f_mu=None, f_sig=None, mu_phase=None, 
-                 sig_phase=None, spread=None, typ="sinusoidal", error_typ="xy"):
+
+class RotError(object):
+    def __init__(self, max_rot=0.4, min_rot=0.05, max_dev=0.1,min_dev=0.01,
+                 f_mu=None, f_sig=None, mu_phase=None, sig_phase=None,
+                 spread=None, typ="sinusoidal", error_typ="xy"):
 
         if max_rot < min_rot:
             raise RotErrorBadParameterException("max_rot must be bigger than"
-                                              " min_rot.")
+                                                " min_rot.")
         self.max_mu = max_rot
         self.min_mu = min_rot
         
         if max_dev < min_dev:
             raise RotErrorBadParameterException("max_dev must be bigger than"
-                                              " min_dev.")
+                                                " min_dev.")
         self.max_sig = max_dev
         self.min_sig = min_dev
         if spread is None:
-            self.spread = 0.2
+            self.spread = 0.2  # default spread
         if (typ == "sinusoidal") or (typ == "gaussian"):
             self.typ = typ
-            bias_mu_sin = (max_rot + min_rot) /2
-            bias_sig_sin = (max_dev + min_dev)/2
-            if self.typ == "sinusoidal":     
-                amp_mu_sin = (max_rot - min_rot)/2
-                amp_sig_sin = (max_dev - min_dev)/2
+            bias_mu_sin = (max_rot + min_rot) / 2
+            bias_sig_sin = (max_dev + min_dev) / 2
+            if self.typ == "sinusoidal":
+                amp_mu_sin = (max_rot - min_rot) / 2
+                amp_sig_sin = (max_dev - min_dev) / 2
                 self.amp_mu_sin = amp_mu_sin
                 self.bias_mu_sin = bias_mu_sin
                 self.amp_sig_sin = amp_sig_sin
@@ -43,20 +47,22 @@ class Rot_Error(object):
                 self.sig = None
                 if f_mu is None:
                     # EPR frame of 43 qubits take 5.2 seconds
-                    # we assume a default T = 20.8 s ~ f = 0.05 Hz for mean value
+                    # we assume a default T = 20.8 s ~ f = 0.05 Hz 
+                    # for mean value
                     self.wf_mu = np.pi / 10
                 else:
-                    self.wf_mu = 2*np.pi*f_mu
+                    self.wf_mu = 2 * np.pi * f_mu
 
                 if f_sig is None:
-                    # we assume a default Tau = 2T ~ f = 0.1 Hz for standard deviation
+                    # we assume a default Tau = 2T ~ f = 0.1 Hz 
+                    # for standard deviation
                     self.wf_sig = np.pi / 5
                 else:
-                    self.wf_sig = 2*np.pi*f_sig
+                    self.wf_sig = 2 * np.pi * f_sig
 
                 if sig_phase is None:
                     #we assume a default phase of pi for the mu sinusoidal
-                    self.phi_sig = np.pi 
+                    self.phi_sig = np.pi
                 else:
                     self.phi_sig = sig_phase
 
@@ -76,11 +82,13 @@ class Rot_Error(object):
                 self.phi_sig = None
                 self.phi_mu = None
         else:
-            raise RotErrorBadTypException("typ must be sinusoidal or gaussian, "
-                                        "{ntyp} is not implemented".format(ntyp=typ))
+            raise RotErrorBadTypException("typ must be sinusoidal or gaussian"
+                                          ", {ntyp} is not implemented".format(
+                                              ntyp=typ))
         self.started = False
         self._start_time = None
         self.error_typ = error_typ
+
 
     def _start(self):
         if self.typ == "sinusoidal":
@@ -119,18 +127,24 @@ class Rot_Error(object):
             else:
                 self.history = pd.concat([self.history, df_to_add])
 
+
     def _mu_sig_sin(self):
         t = time.perf_counter() - self.start_time
-        mu = self.amp_mu_sin * np.sin(self.wf_mu*t+ self.phi_mu) + self.bias_mu_sin
-        sig = self.amp_sig_sin * np.sin(self.wf_sig*t + self.phi_sig) + self.bias_sig_sin
+        mu = (self.amp_mu_sin * np.sin(self.wf_mu * t + self.phi_mu) 
+              + self.bias_mu_sin)
+        sig = (self.amp_sig_sin * np.sin(self.wf_sig * t + self.phi_sig) 
+               + self.bias_sig_sin)
         
-        df_gauss = pd.DataFrame([[t, mu, sig]], columns=["time_gauss", "mu", "sig"])
+        df_gauss = pd.DataFrame([[t, mu, sig]], 
+                                columns=["time_gauss", "mu", "sig"])
         self._actualize_history(df_to_add=df_gauss)
+        
         return mu, sig
+
 
     def _get_gamma(self):
         if not self.started:
-            self._start() 
+            self._start()
         if self.typ == "sinusoidal":
             mu, sig = self._mu_sig_sin()
         else:
@@ -138,16 +152,18 @@ class Rot_Error(object):
             sig = self.sig
         gamm = np.random.normal(loc=mu, scale=sig)
         t = time.perf_counter() - self.start_time
-        if gamm < 0:
-            gamm = 0
+        
+        if gamm < GAMMA_LIMIT:
+            gamm = GAMMA_LIMIT
         df_gamm = pd.DataFrame([[t, gamm]], columns=["time_gamm", "gamm"])
         self._actualize_history(df_to_add=df_gamm)
         
         return gamm
 
-    def apply_error(self, flying_qubit:Qubit):
-        gamma = self._get_gamma()
 
+    def apply_error(self, flying_qubit: Qubit):
+
+        gamma = self._get_gamma()
         if self.error_typ == "xy":
             flying_qubit.rx(phi=gamma)
             flying_qubit.ry(phi=gamma)
