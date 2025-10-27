@@ -27,7 +27,7 @@ from qunetsim.components import Host, Network
 from qunetsim.objects import DaemonThread, Qubit
 import QuTils
 from epr_gen_class import EPRgenerator, epr_pair_fidelity
-from ent_buff_itfc_FT_NON_IDEAL_FEU import EPR_buff_itfc
+from qmem_manager import EPR_buff_itfc
 from rotational_error_class import RotError
 from pipelined_CQ_channel import QuPipe, ClassicPipe
 from pred_Q import PredFrameLen as FrameLenEst
