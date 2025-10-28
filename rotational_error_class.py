@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from qunetsim.objects import Qubit
 
-GAMMA_LIMIT = 0 
+GAMMA_LIMIT = 0
 
 class RotErrorBadParameterException(Exception):
     pass

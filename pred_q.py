@@ -25,7 +25,7 @@ class PredFrameLen(object):
             self._eff_load = eff_load
 
         if phase is None:
-            #we assume a default phase of pi/2 for the sigma sinusoidal
+            # we assume a default phase of pi/2 for the sigma sinusoidal
             self._phi = np.pi
         else:
             self._phi = phase

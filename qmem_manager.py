@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 import pandas as pd
-from QuTils import get_epr_fidelity
+from quTils import get_epr_fidelity
 from qunetsim.objects import Qubit
 from qunetsim.components import Host
 
@@ -44,13 +44,13 @@ class IsNotReceiversITFCException(Exception):
 
 
 class EntanglementManager(object):
-    """A class that manages the quantum entanglement stored in a quantum memory
-    accessed through host.
-    The payload of a quantum frame is stored under a frame identifier and each
-    qubit of the payload has a unique qubit id. This information is used to 
-    retrieve and store qubits from the quantum memory; thus, enabling the
-    quantum communication between Alice and Bob, each with its own entanglement
-    manager."""
+    """A class that manages the quantum entanglement stored in a quantum
+    memory accessed through host.
+    The payload of a quantum frame is stored under a frame identifier
+    and each qubit of the payload has a unique qubit id. This
+    information is used to retrieve and store qubits from the quantum
+    memory; thus, enabling the quantum communication between Alice and
+    Bob, each with its own entanglement manager."""
     def __init__(self, host: Host, partner_host_id=None, n_exp=None,
                  eff_load=None, is_receiver=None, use_max_fest=None):
 
@@ -122,10 +122,10 @@ class EntanglementManager(object):
 
 
     def _start_history(self):
-        """set up the corresponding dataframe where the history(all relevant 
-        data) of the entanglement manager will be stored.
-        Two histories are crucial and are stored in separate dataframes, EPR
-        and SDC frame history."""
+        """set up the corresponding dataframe where the history(all
+        relevant data) of the entanglement manager will be stored.
+        Two histories are crucial and are stored in separate dataframes,
+        EPR and SDC frame history."""
         if self.is_receiver:
             self.EPR_frame_history = pd.DataFrame({"ID": pd.Series(
                 dtype="int"), "t_init": pd.Series(dtype="float"),
@@ -186,8 +186,8 @@ class EntanglementManager(object):
 
     def _actualize_histories(self, df_to_add, kind:str):
         """adds relevant information to history.
-        a dataframe to be added is passed in as well as the kind of history. 
-        This might be either epr, sdc or input of epr pairs."""
+        a dataframe to be added is passed in as well as the kind of
+        history. This might be either epr, sdc or input of epr pairs."""
         if kind == "epr":
             if self.is_receiver:  # valid for receiver
                 if self.EPR_frame_history.size == 0:
@@ -328,8 +328,8 @@ class EntanglementManager(object):
 
 
     def _append_mssg_to_ip_id(self, mssg:str):
-        """append a message to ip id. Appended messages are used to check
-        validity on the communication phases transitions."""
+        """append a message to ip id. Appended messages are used to
+        check validity on the communication phases transitions."""
         if type(mssg) is not str:
             raise ValueError("pass a valid string mssg")
         else:
@@ -403,18 +403,19 @@ class EntanglementManager(object):
 
     def _actualize_after_popdrop_id(self, id_f):
         self._clear_frame_info(frame_id=id_f)
-        if len(self.f_ids)==0:
+        if len(self.f_ids) == 0:
             self.is_full = False
         self.f_ids.add(id_f)
-        if len(self.f_ids)==self.n:
+        if len(self.f_ids) == self.n:
             self.is_empty = True
 
     # ***************************************************
     # ** Methods for Phases of EPR-Frame Communication **
     # ***************************************************
     def nfid_epr_start(self):
-        """starts the epr frame communication. Returns the next(n) free(f) 
-        frame (f) identifier(id) to begin the communication phases."""
+        """starts the epr frame communication. Returns the next(n) 
+        free(f) frame (f) identifier(id) to begin the communication
+        phases."""
         if not self.in_process:
             free_list = self.f_ids.copy()
             free_list = list(free_list)
@@ -450,7 +451,7 @@ class EntanglementManager(object):
             self._actualize_histories(df_to_add=actualize_df, kind="in")
             q_id = self.host.add_epr(host_id=self.partner_host_id,
                                      qubit=epr_half)
-            if len(qids)==0:
+            if len(qids) == 0:
                 self._set_mssg_to_ip_id("EPR:storing")
             qids.append(q_id)
         else:
@@ -460,8 +461,8 @@ class EntanglementManager(object):
 
 
     def get_qids_epr_phase_2(self):
-        """returns the qubit identidiers stored under the in process frame 
-        id."""
+        """returns the qubit identidiers stored under the in process
+        frame id."""
         if self.in_process and self._get_mssg_ip() == "EPR:storing":
             qids = self._get_qids_from_fr_id(id_f=
                                                   self._get_id_ip())
@@ -477,8 +478,9 @@ class EntanglementManager(object):
 
 
     def get_epr_phase_3(self, qubit_id: str):
-        """get the EPR half *qubit_id*. This method is solely used for getting
-        the EPR halves to be measured in the FEU(fidelity estimation unit). """
+        """get the EPR half *qubit_id*. This method is solely used for
+        getting the EPR halves to be measured in the FEU(fidelity
+        estimation unit). """
 
         if type(qubit_id) is not str:
             raise BadInputException("A valid qubit_id must be passed.")
@@ -493,7 +495,7 @@ class EntanglementManager(object):
                 epr_half = self.host.get_epr(host_id=self.partner_host_id,
                                              q_id=qubit_id)
                 del(qids[idx])
-                if len(qids)==self.eff_load:
+                if len(qids) == self.eff_load:
                     self._set_mssg_to_ip_id("EPR:FEU-validating")
                     ti_F_val = time.perf_counter() - self.start_time
                     actualize_df = pd.DataFrame([[ti_F_val]],
@@ -511,8 +513,9 @@ class EntanglementManager(object):
     # reaction to ACK and to F_est > F_thres
     def set_f_epr_end_phase(self, F_est=None, to_history=False):
         """set the estimated fidelity to the frame id in process.
-        If to_history, the fidelity is being stored inbetween of the epr-frame
-        communication process and is not the end phase of the protocol."""
+        If to_history, the fidelity is being stored inbetween of the
+        epr-frame communication process and is not the end phase of the
+        protocol."""
         if to_history:
             if self.is_receiver:
                 actualize_df = pd.DataFrame([[F_est]], columns=["F_est_ideal"])
@@ -525,7 +528,7 @@ class EntanglementManager(object):
                 "EPR:FEU-validating"):
                 ip_id = self._get_id_ip()
                 f = self._get_f_from_fr_id(id_f=ip_id)
-                if len(f)==0:
+                if len(f) == 0:
                     f.append(F_est)
                     t_fin = time.perf_counter() - self.start_time
                     actualize_df = pd.DataFrame([[F_est, int(1),t_fin]],
@@ -533,15 +536,15 @@ class EntanglementManager(object):
                                                          "t_finish"])
                     self._actualize_histories(df_to_add=actualize_df,
                                               kind="epr")
-                    if len(self.u_ids)==0:
+                    if len(self.u_ids) == 0:
                         self.is_empty = False
                     self.u_ids.append(ip_id)
-                    if len(self.u_ids)==self.n:
+                    if len(self.u_ids) == self.n:
                         self.is_full = True
                     self._reset_ip()
                 else:
-                    raise FidelitySettingException("Frame {iD} has already a" \
-                    " f_est.".format(iD=ip_id))
+                    raise FidelitySettingException("Frame {iD} has already a" 
+                                                   " f_est.".format(iD=ip_id))
             else:
                 raise BadPhaseCallException("set_f_epr_end_phase can be called"
                                             " only after EPR_PHASE_3.")
@@ -550,10 +553,9 @@ class EntanglementManager(object):
     # reaction to NACK and to F_est < F_thres
     def drop_ip_id_epr_end_phase(self, fest=None):
         """drops the frame in process."""
-        if (self.in_process and self._get_mssg_ip()==
-            "EPR:FEU-validating"):
+        if self.in_process and self._get_mssg_ip() == "EPR:FEU-validating":
             self._drop_stored_epr_frame_id(id_f=self._get_id_ip())
-            if fest == None:
+            if fest is None:
                 fest = 0
             t_fin = time.perf_counter() - self.start_time
             actualize_df = pd.DataFrame([[fest, int(0), t_fin]],
@@ -568,7 +570,7 @@ class EntanglementManager(object):
     # reaction to D-NACK
     def drop_dnack_epr_end_phase(self):
         if not self.is_receiver:
-            if self.in_process and self._get_mssg_ip()=="EPR:storing":
+            if self.in_process and self._get_mssg_ip() == "EPR:storing":
                 ipid = self._get_id_ip()
                 nuid = self._get_nxt_uid()
                 fid = self._get_f_from_fr_id(id_f=nuid)
@@ -592,11 +594,12 @@ class EntanglementManager(object):
 
     # correct EPR-Frame in storing process as SDC-Frame.
     def correct_epr_as_sdc_epr_phase_2(self):
-        """correct an sdc frame that was stored at a receivers entanglement 
-        manager as an epr frame. It also returns the the next used frame 
-        identifier (nuid) containing the corresponding epr-pair halves."""
+        """correct an sdc frame that was stored at a receivers
+        entanglement manager as an epr frame. It also returns the the
+        next used frame identifier (nuid) containing the corresponding
+        epr-pair halves."""
         if self.is_receiver:
-            if (self.in_process and (self._get_mssg_ip() == "EPR:storing")):
+            if self.in_process and (self._get_mssg_ip() == "EPR:storing"):
                 nuid = self._get_nxt_uid()
                 self._append_id_to_ip_id(nuid)
                 self._append_mssg_to_ip_id("SDC:correct_EPR")
@@ -620,17 +623,18 @@ class EntanglementManager(object):
 
 
     def pop_sync_sdc_end_phase(self):
-        """Used after using *store_epr_phase_1* and *nuid_sdc_start* in order
-        to correct a received SDC-Frame misinterpreted as EPR-Frame. The
-        received SDC-Frame was stored as EPR-Frame. The stored SDC-Frame is 
-        poped qubit by qubit alongside its corresponding stored EPR-Frame in
-        order to decode the SDC-encoded classical information.
-        returns an epr-pair encoded with information and stored at receiver."""
+        """Used after using *store_epr_phase_1* and *nuid_sdc_start* in
+        order to correct a received SDC-Frame misinterpreted as
+        EPR-Frame. The received SDC-Frame was stored as EPR-Frame. The
+        stored SDC-Frame is poped qubit by qubit alongside its
+        corresponding stored EPR-Frame in order to decode the
+        SDC-encoded classical information. Returns an epr-pair encoded 
+        with information and stored at receiver."""
         
         if self.is_receiver:
             ip_mssgs = self._get_mssg_ip()
-            mssg_is_valid = ((ip_mssgs[1]=="SDC:correct_EPR") 
-                             or (ip_mssgs[1]=="SDC:sync_rtrv_sto"))
+            mssg_is_valid = ((ip_mssgs[1] == "SDC:correct_EPR") 
+                             or (ip_mssgs[1] == "SDC:sync_rtrv_sto"))
             if self.in_process and mssg_is_valid:
                 ip_ids = self._get_id_ip()
 
@@ -681,8 +685,8 @@ class EntanglementManager(object):
     
     def nuid_sdc_start(self):
         """starts the sdc-frame communnication process.
-        It returns the frame identifier (id) of the next(n) to be used(u)
-        stored frame."""
+        It returns the frame identifier (id) of the next(n) to be 
+        used(u) stored frame."""
         if not self.in_process:
             nuid = self._get_nxt_uid()
             fest = self._get_f_from_fr_id(id_f=nuid)
@@ -701,13 +705,14 @@ class EntanglementManager(object):
 
 
     def pop_sdc_end_phase(self):
-        """pop the corresponding qubit from the entanglement manager to be used
-        in the sdc-decoding process."""
-        if (self.in_process and ((self._get_mssg_ip()=="SDC:started") or 
-                                 (self._get_mssg_ip()=="SDC:epr-retrieving"))):
+        """pop the corresponding qubit from the entanglement manager to
+        be used in the sdc-decoding process."""
+        if (self.in_process and ((self._get_mssg_ip() == "SDC:started") 
+                                 or (self._get_mssg_ip() == 
+                                     "SDC:epr-retrieving"))):
             ip_id = self._get_id_ip()
             qids = self._get_qids_from_fr_id(id_f=ip_id)
-            if len(qids)==self.eff_load:
+            if len(qids) == self.eff_load:
                 self._set_mssg_to_ip_id(mssg="SDC:epr-retrieving")
             qid = qids.pop(0)
             epr_half = self.host.get_epr(host_id=self.partner_host_id, 
