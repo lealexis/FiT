@@ -19,7 +19,7 @@ of a distributed EPR-pair decreases, depending on its pre-distribution
 fidelity and the &#947; angle applied at the R-xy gate; This effect is 
 shown in the image bellow.<br/>
 
-<img src="https://github.com/lealexis/FiT/blob/main/assets/channel_effect_over_epr.PNG" alt="effect-on-fidelity" style="width:20%; height:auto;"><br/>
+<img src="https://github.com/lealexis/FiT/blob/main/assets/channel_effect_over_epr.PNG" alt="effect-on-fidelity" style="width:50%; height:auto;"><br/>
 
 When an _EPR-frame_ is distributed, its fidelity is estimated by measuring
 some EPR-pairs from the payload[^1]. This is achieved thanks to the 
