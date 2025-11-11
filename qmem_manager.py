@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 import pandas as pd
-from quTils import get_epr_fidelity
+from qutils import get_epr_fidelity
 from qunetsim.objects import Qubit
 from qunetsim.components import Host
 
