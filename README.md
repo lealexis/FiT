@@ -88,12 +88,27 @@ in the _entanglement manager_.<br/>
 
 <img src="https://github.com/lealexis/FiT/blob/main/assets/EPR_DIST.png" alt="EPR-frame distribution" style="width:50%; height:auto;"><br/>
 
+When an _EPR-frame_ is mistakenly received as an _SDC-frame_ at Bob, he knows 
+about the mistake because of the amount of qubits in the payload. Then 
+he reacts accordingly as shown in the image bellow.<br/>
 
+<img src="https://github.com/lealexis/FiT/blob/main/assets/EPR_ERR.png" alt="EPR-frame correction" style="width:50%; height:auto;"><br/>
 
+On the other hand, when an _SDC-frame_ is distributed and correctly 
+interpreted, the information is just decoded without the need of any 
+feedback signal between Alice and Bob as it is shown in the image bellow.<br/>
 
+<img src="https://github.com/lealexis/FiT/blob/main/assets/SDC_DIST" alt="SDC-frame distribution" style="width:50%; height:auto;"><br/>
 
-[epr-frame erroneous](/assets/EPR_ERR.png)
-[sdc-frame distribution](/assets/SDC_DIST.png)
-[sdc-frame correction](/assets/SDC_CORRECT.png)  
+Finally, when an _SDC-frame_ is distributed from Alice to Bob and is 
+interpreted as an _EPR-frame_; Bob knows about the mistake because of 
+the payload's length. Thus he can correct the error without further
+feedback signal between Alice and Bob. This is shown in the image bellow.<br/>
+
+<img src="https://github.com/lealexis/FiT/blob/main/assets/SDC_CORRECT.png" alt="SDC-frame correction" style="width:50%; height:auto;"><br/>
+
+## Requirements
+
+In order to run this simulation, a modified version of [QuNetSim](https://github.com/tqsd/QuNetSim) must be installed and is found in [https://github.com/lealexis/QuNetSim](https://github.com/lealexis/QuNetSim).
 
 [^1]: Axel Dahlberg, Matthew Skrzypczyk, Tim Coopmans, Leon Wubben, Filip Rozpędek, Matteo Pompili, Arian Stolk, Przemysław Pawełczak, Robert Knegjens, Julio de Oliveira Filho, Ronald Hanson, and Stephanie Wehner. 2019. A link layer protocol for quantum networks. In Proceedings of the ACM Special Interest Group on Data Communication (SIGCOMM '19). Association for Computing Machinery, New York, NY, USA, 159–173. https://doi.org/10.1145/3341302.3342070
