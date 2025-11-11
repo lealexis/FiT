@@ -22,6 +22,12 @@ is characterized.<br/>
 
 <img src="https://github.com/lealexis/FiT/blob/main/assets/channel_effect_over_epr.PNG" alt="effect-on-fidelity" style="width:50%; height:auto;"><br/>
 
+Additionaly, the &#947; angle effect on the generated EPR-pairs over 
+time is visualized in the image bellow. It can be clearly seen how the 
+fidelity of the EPR-pairs decrease.
+
+<img src="https://github.com/lealexis/FiT/blob/main/assets/EPR_BEF_AFT" alt="effect-on-epr-pairs" style="width:50%; height:auto;">
+
 When an _EPR-frame_ is distributed, its fidelity is estimated by measuring
 some EPR-pairs from the payload[^1]. This is achieved thanks to the 
 [epr-frame length estimator](/pred_q.py) and [entanglement manager](/qmem_manager.py).<br/>
@@ -38,13 +44,14 @@ negative acknowledged _EPR-frames_.<br/>
 <img src="https://github.com/lealexis/FiT/blob/main/assets/result_5.PNG" alt="ack-nack-frames" style="width:50%; height:auto;"><br/>
 
 To depict the consequences of setting a fidelity threshold for the 
-distributed _EPR-frames_, the images bellow shows the receiped _mario_: 
-first, when no threshold policy is applied, and second, when a fidelity
-threshold of 0.9 is applied.
+distributed _EPR-frames_, the images bellow shows the receiped _mario_ 
+with and without threshold. It is clear that a threshold policy on the 
+distributed _EPR-frames_ minimizes the amount of errors when the 
+distributed entanglement is later used to convei information.
 
 Without Threshold             |  F<sub>thres</sub> = 0.9
 :-------------------------:|:-------------------------:
-<img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ds_NON_IDEAL_J0.8.png" alt="mario-without-threshold" style="width:10%; height:auto;"> |  <img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ft_NON_IDEAL_0.9.png" alt="mario-0.9-threshold" style="width:10%; height:auto;">
+<img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ds_NON_IDEAL_J0.8.png" alt="mario-without-threshold" style="width:30%; height:auto;"> |  <img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ft_NON_IDEAL_0.9.png" alt="mario-0.9-threshold" style="width:30%; height:auto;">
 
 ## About the FiT protocol
 
