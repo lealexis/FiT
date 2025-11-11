@@ -42,9 +42,14 @@ distributed _EPR-frames_, the images bellow shows the receiped _mario_:
 first, when no threshold policy is applied, and second, when a fidelity
 threshold of 0.9 is applied.
 
-<img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ds_NON_IDEAL_J0.8.png" alt="mario-without-threshold" style="width:50%; height:auto;"><br/>
-<img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ft_NON_IDEAL_0.9.png" alt="mario-0.9-threshold" style="width:50%; height:auto;">
-
+<div class="row">
+   <div class="column">
+      <img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ds_NON_IDEAL_J0.8.png" alt="mario-without-threshold" style="width:10%; height:auto;">
+   </div>
+   <div class="column">
+      <img src="https://github.com/lealexis/FiT/blob/main/assets/mario_ft_NON_IDEAL_0.9.png" alt="mario-0.9-threshold" style="width:10%; height:auto;">
+   </div>
+</div>
 
 ## About the FiT protocol
 
