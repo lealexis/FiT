@@ -1,11 +1,12 @@
 # FiT(Fidelity Threshold) protocol
 Simulation and implementation of the FiT Link layer quantum communication 
-protocol. A noisy communication link between Alice and Bob is established 
-to enable the distribution of quantum frames from Alice to Bob. The quantum 
-frame's payload is either entanglement a.k.a. EPR(Einstein-Podolsky-Rosen)-Pairs 
-or superdense encoded information i.e. _EPR-frame_ or _SDC-frame_. The classical
-information that is superdense encoded at Alice and sent to Bob is shown
-bellow and referenced as _mario_.<br/>
+protocol is in the central scrip [simulation_fit_protocol.py](/simulation_fit_protocol.py).
+A noisy quantum communication link between Alice and Bob is established 
+to enable the distribution of quantum frames from Alice to Bob. The 
+quantum frame's payload is either entanglement a.k.a. EPR(Einstein-Podolsky-Rosen)-Pairs 
+or superdense encoded information i.e. _EPR-frame_ or _SDC-frame_. The 
+classical information that is superdense encoded at Alice and sent to 
+Bob is shown bellow and referenced as _mario_.<br/>
 
 <img src="https://github.com/lealexis/FiT/blob/main/assets/mario_original.png" alt="mario-original" style="width:8%; height:auto;"><br/>
 
@@ -55,7 +56,42 @@ Without Threshold             |  F<sub>thres</sub> = 0.9
 
 ## About the FiT protocol
 
-[epr-frame distribution](/assets/EPR_DIST.png)
+The FiT protocol is inspired by the classical acknowledgement protocols
+where the recipient of a data packet sends an _ack-signal_ if the data packet
+was correctly received, otherwise sends an _nack-signal_(negative acknowledgment)
+requesting the data packet to be sent again.<br/>
+
+The FiT protocol has two posible _quantum-frames_ to be sended from Alice
+to Bob. It can be either an _EPR-frame_ or a _SDC-frame_. They are procesed
+thanks to the developed [entanglement manager](/qmem_manager.py), which 
+keeps track of the distributed _EPR-frames_ and their position in the 
+quantum memory. I.e. in the table bellow is shown an abstraction of a 
+quantum memory, where the qubits of different _EPR-frames_ are stored. 
+Each stored qubit has an unique _qubit identifier_ which is used to keep
+access to it. On the rigth side of the table, is shown an abstraction of
+the entanglement manager. For each distributed _EPR-frame_, an _identifier_
+is used (a numbers from 0, 1, 2, ...) and the estimated fidelity as well as 
+the _qubit-identifiers_ of the qubits composing the _EPR-frame_ are stored.
+With this information, the _entanglement manager_ can access specific 
+_EPR-frames_ and its information in order to perform actions on them.<br/>
+
+Quantum Memory            |  Entanglement manager
+:-------------------------:|:-------------------------:
+<img src="https://github.com/lealexis/FiT/blob/main/assets/qmem.PNG" alt="quantum-memory" style="width:30%; height:auto;"> |  <img src="https://github.com/lealexis/FiT/blob/main/assets/qmem_itfc.PNG" alt="ent-manager" style="width:30%; height:auto;">
+
+When an _EPR-frame_ is distributed, it can be stored or dropped, depending
+on its estimated fidelity and the fidelity threshold governing the protocol.
+Furthermore, the specific _EPR-Feedback_ as well as _EPR-ACK/NACK_ are 
+sended between Alice and Bob to fullfil the protocol. This is shown in
+the diagram bellow, where the lilac rentangles are functions implemented
+in the _entanglement manager_.<br/>
+
+<img src="https://github.com/lealexis/FiT/blob/main/assets/EPR_DIST.png" alt="EPR-frame distribution" style="width:50%; height:auto;"><br/>
+
+
+
+
+
 [epr-frame erroneous](/assets/EPR_ERR.png)
 [sdc-frame distribution](/assets/SDC_DIST.png)
 [sdc-frame correction](/assets/SDC_CORRECT.png)  
