@@ -98,7 +98,7 @@ On the other hand, when an _SDC-frame_ is distributed and correctly
 interpreted, the information is just decoded without the need of any 
 feedback signal between Alice and Bob as it is shown in the image bellow.<br/>
 
-<img src="https://github.com/lealexis/FiT/blob/main/assets/SDC_DIST" alt="SDC-frame distribution" style="width:50%; height:auto;"><br/>
+<img src="https://github.com/lealexis/FiT/blob/main/assets/SDC_DIST.png" alt="SDC-frame distribution" style="width:50%; height:auto;"><br/>
 
 Finally, when an _SDC-frame_ is distributed from Alice to Bob and is 
 interpreted as an _EPR-frame_; Bob knows about the mistake because of 
