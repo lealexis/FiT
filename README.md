@@ -24,9 +24,9 @@ is characterized.<br/>
 
 Additionaly, the &#947; angle effect on the generated EPR-pairs over 
 time is visualized in the image bellow. It can be clearly seen how the 
-fidelity of the EPR-pairs decrease.
+fidelity of the EPR-pairs decreases depending on the applied &#947; angle.
 
-<img src="https://github.com/lealexis/FiT/blob/main/assets/EPR_BEF_AFT.png" alt="effect-on-epr-pairs" style="width:50%; height:auto;">
+<img src="https://github.com/lealexis/FiT/blob/main/assets/EPR_BEF_AFT.PNG" alt="effect-on-epr-pairs" style="width:50%; height:auto;"><br/>
 
 When an _EPR-frame_ is distributed, its fidelity is estimated by measuring
 some EPR-pairs from the payload[^1]. This is achieved thanks to the 
