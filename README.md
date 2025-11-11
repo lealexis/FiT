@@ -11,9 +11,9 @@ The distributed entanglement satisfies a
 minimal threshold fidelity.
 ## The FiT protocol
 
-[epr-frame-dist](/assets/EPR_DIST.png)
-[epr-err](/assets/EPR_ERR.png)
-[sdc-dist](/assets/SDC_DIST.png)
-[sdc-correct](/assets/SDC_CORRECT.png)  
+![epr-frame-dist](/assets/EPR_DIST.png)
+![epr-err](/assets/EPR_ERR.png)
+![sdc-dist](/assets/SDC_DIST.png)
+![sdc-correct](/assets/SDC_CORRECT.png)  
 
 <img src="https://github.com/lealexis/FiT/blob/main/assets/mario_sprite.bmp" alt="mario-original" style="width:8%; height:auto;">
